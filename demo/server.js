@@ -31,7 +31,7 @@ ssrApiCache({
     // apiRoute: '/api/update',
     express: app,
     // validIP: '192.168.6.23',
-    strict: true,
+    // strict: true,
     filePath: "demo/public/staticdata.js",
     onUpdated: function (item, newVlaue) {
         // console.log(item.name + " update to ", global['__' + item.name]);

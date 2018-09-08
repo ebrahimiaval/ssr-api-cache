@@ -305,6 +305,7 @@ module.exports = function (userOption) {
             name = req.params.name,
             ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
+        let status, response;
 
         // -------  validation -------
         let isInvalid = false;
@@ -319,19 +320,35 @@ module.exports = function (userOption) {
             isInvalid = ip !== validIP;
         }
         //
-        if (isInvalid)
-            res.status(402).send("You have not access to do this action!");
+        if (isInvalid) {
+            status = 402;
+            response = "You have not access to run update cache api!";
+        }
 
         // fetch data and update
+        let targetItem = null
         list.forEach(function (item) {
             if (item.name === name)
-                fetchDataFromApi(item)
-                    .then(function () {
-                        res.status(200).send(name + " successfully updated.");
-                    })
-                    .catch(function (error) {
-                        console.error('ssr-api-cache ERROR: ', error, '(error in update API)');
-                    });
+                targetItem = item;
         });
+
+        if (targetItem !== null) {
+            fetchDataFromApi(targetItem)
+                .then(function () {
+                    status = 200;
+                    response = name + " successfully updated.";
+                })
+                .catch(function (error) {
+                    console.error('ssr-api-cache ERROR: ', error, `(error in update API - requested IP ${ip})`);
+                    //
+                    status = 500;
+                    response = `have error during fetch data from api '${targetItem.api}' of '${targetItem.name}'.`;
+                });
+        } else {
+            status = 404;
+            response = `not found any item with name = ${name}. check inserted value.`;
+        }
+
+        res.status(status).send(response);
     });
 }
