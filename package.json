@@ -1,0 +1,22 @@
+{
+  "name": "ssr-api-cache",
+  "version": "1.0.0",
+  "main": "dist/ssr-api-cache.js",
+  "scripts": {
+    "build": "babel ./src --watch --out-dir ./dist --source-maps",
+    "demo": "nodemon ./demo/server.js --ignore staticdata.js"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-minify": "^0.4.3",
+    "babel-preset-stage-0": "^6.24.1",
+    "nodemon": "^1.18.4"
+  }
+}

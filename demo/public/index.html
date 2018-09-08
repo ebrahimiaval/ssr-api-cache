@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo of ssr-api-cache module</title>
+</head>
+<body>
+<h1>SSR API Cache Demo</h1>
+<p>use "ctrl+F5" to see updated vlaue.</p>
+
+<h3>window.__menu</h3>
+<pre id="menu"></pre>
+<br>
+<h3>window.__theme</h3>
+<pre id="theme"></pre>
+<br>
+<h3>window.__help</h3>
+<pre id="help"></pre>
+<br>
+<script src="/staticdata.js"></script>
+<script>
+    document.getElementById('menu').innerHTML = JSON.stringify(window.__menu);
+    document.getElementById('theme').innerHTML = JSON.stringify(window.__theme);
+    document.getElementById('help').innerHTML = JSON.stringify(window.__help);
+</script>
+</body>
+</html>
