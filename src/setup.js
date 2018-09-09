@@ -6,11 +6,7 @@
  *
  */
 const axios = require("axios");
-try {
-    var fs = require('fs');
-} catch (err) {
-    fs = {};
-}
+const fs = require('fs');
 
 
 
@@ -52,10 +48,6 @@ module.exports = function (userConfig) {
      *      }
      *
      */
-    const
-        storeName = '__ssrApiCache__';
-
-
     // extend user config with default config
     const config = {
         ...{
@@ -66,7 +58,6 @@ module.exports = function (userConfig) {
         },
         ...userConfig
     };
-
     // extend api parameter
     config.api = {
         method: 'patch',
@@ -75,8 +66,13 @@ module.exports = function (userConfig) {
         ...userConfig.api
     }
 
+    /**
+     *  ----- define constants ----
+     */
     // directly access to config parameter
-    const {list, api} = config;
+    const
+        {list, api} = config,
+        storeName = '__ssrApiCache__';
 
 
     /**
@@ -283,6 +279,7 @@ module.exports = function (userConfig) {
                         targetItem = item;
                 });
 
+                // fetch data from api
                 if (targetItem !== null) {
                     fetchDataFromApi(targetItem)
                         .then(function () {
@@ -296,7 +293,6 @@ module.exports = function (userConfig) {
                 } else {
                     res.status(404).send(`not found any item with name = ${name}. check inserted value.`);
                 }
-
             } else {
                 next();
             }
