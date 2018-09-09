@@ -11,15 +11,16 @@
 <br/>
 
 <h2>server side value</h2>
-<iframe src="/server" height="100" width="100%"></iframe><br/>
+<iframe src="/server" height="100" width="100%"></iframe>
+<br/>
 <a href="/server" target="_blank">open new tab</a>
 
 <br/><br/><br/>
 
 <h2>client side value</h2>
-<b>menu=</b><code id="menu"></code><br/>
-<b>theme=</b><code id="theme"></code><br/>
-<b>help=</b><code id="help"></code><br/>
+<b>menu=</b><span id="menu"></span><br/>
+<b>theme=</b><span id="theme"></span><br/>
+<b>help=</b><span id="help"></span><br/>
 
 <script src="/staticdata.js"></script>
 <script>
@@ -27,5 +28,6 @@
     document.getElementById('theme').innerHTML = JSON.stringify(window.__theme);
     document.getElementById('help').innerHTML = JSON.stringify(window.__help);
 </script>
+<script src="script.js" async></script>
 </body>
 </html>

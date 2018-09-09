@@ -1,7 +1,7 @@
 {
   "name": "ssr-api-cache",
   "version": "1.0.0",
-  "main": "dist/ssr-api-cache.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "babel ./src --watch --out-dir ./dist --source-maps",
     "demo": "nodemon ./demo/server.js --ignore staticdata.js"

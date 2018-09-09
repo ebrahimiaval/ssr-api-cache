@@ -5,11 +5,20 @@
  * and create a file and write global variable on it for client side render
  *
  */
-const
-    axios = require("axios"),
-    fs = require('fs');
+const axios = require("axios");
+try {
+    var fs = require('fs');
+} catch (err) {
+    fs = {};
+}
 
 
+
+
+/**
+ *  build cache stream
+ * @param userOption
+ */
 module.exports = function (userOption) {
     /**
      * ---- options ----
@@ -352,3 +361,27 @@ module.exports = function (userOption) {
         res.status(status).send(response);
     });
 }
+
+
+
+
+
+// /**
+//  * read value of one cache
+//  * @type {{setup: setup, get}}
+//  */
+// const get = function (name) {
+//     return (typeof window === 'undefined') ? global.__ssrApiCache__[name] : window.__ssrApiCache__[name];
+// }
+//
+//
+
+
+// /**
+//  * export
+//  * @type {{setup: setup, get: {setup: setup, get}}}
+//  */
+// module.exports = {
+//     setup: setup,
+//     get: get
+// }
