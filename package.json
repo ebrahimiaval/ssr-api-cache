@@ -1,10 +1,10 @@
 {
   "name": "ssr-api-cache",
-  "version": "1.1.0",
-  "main": "dist/index.js",
+  "version": "1.2.0",
+  "main": "getCache.js",
   "scripts": {
-    "build": "babel ./src --watch --out-dir ./dist --source-maps",
-    "demo": "nodemon ./demo/server.js --ignore staticdata.js"
+    "build": "babel ./src --watch --out-dir ./",
+    "demo": "babel ./src/getCache.js --out-file ./demo/public/getCache.js && nodemon ./demo/server.js --ignore staticdata.js"
   },
   "dependencies": {
     "axios": "^0.18.0",

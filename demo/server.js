@@ -1,6 +1,6 @@
 const
     // import ssr-api-cache module
-    cache = require('../dist/index'),
+    cacheSetup = require('../setup'),
     // create an express app
     express = require('express'),
     app = express();
@@ -40,7 +40,7 @@ app.use('/server', function (req, res) {
 
 
 //>>>>>>>>>>> defne ssr-api-cache demo >>>>>>>>>>>>>>>>>
-cache({
+cacheSetup({
     // apiRoute: '/api/update',
     express: app,
     // validIP: '192.168.6.23',
