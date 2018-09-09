@@ -67,7 +67,7 @@ module.exports = function (userConfig) {
         ...userConfig
     };
 
-    // extend app
+    // extend api parameter
     config.api = {
         method: 'patch',
         route: '/api/update/', // default api route is '/api/update' and use look like this: localhost:8000/api/update/menu
@@ -249,9 +249,9 @@ module.exports = function (userConfig) {
         const apiRoute = api.route + ':name';
         //
         api.express.use(apiRoute, function (req, res, next) {
-            if (req.method === api.method.toLowerCase()) {
+            if (req.method.toLowerCase() === api.method.toLowerCase()) {
                 const
-                    validIP = config.app.validIP,
+                    validIP = api.validIP,
                     name = req.params.name,
                     ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -272,8 +272,8 @@ module.exports = function (userConfig) {
                 // reject request for invalid user - when request ip not match to validIP user is invalid
                 // NOTICE: by default all ip is valid (validIP === null)
                 if (isInvalid) {
-                    status = 402;
-                    response = "You have not access to run update cache api!";
+                    res.status(402).send("You have not access to run update cache api!");
+                    return false;
                 }
 
                 // fetch data and update
@@ -286,21 +286,17 @@ module.exports = function (userConfig) {
                 if (targetItem !== null) {
                     fetchDataFromApi(targetItem)
                         .then(function () {
-                            status = 200;
-                            response = name + " successfully updated.";
+                            res.status(200).send(name + " successfully updated.");
                         })
                         .catch(function (error) {
                             console.error('ERROR ssr-api-cache: ', error, `(error in update API - requested IP ${ip})`);
                             //
-                            status = 500;
-                            response = `have error during fetch data from api '${targetItem.api}' of '${targetItem.name}'.`;
+                            res.status(500).send(`have error during fetch data from api '${targetItem.api}' of '${targetItem.name}'.`);
                         });
                 } else {
-                    status = 404;
-                    response = `not found any item with name = ${name}. check inserted value.`;
+                    res.status(404).send(`not found any item with name = ${name}. check inserted value.`);
                 }
 
-                res.status(status).send(response);
             } else {
                 next();
             }
