@@ -48,16 +48,21 @@ module.exports = function (userConfig) {
      *      }
      *
      */
-    // extend user config with default config
+        // extend user config with default config
     const config = {
-        ...{
-            filePath: 'public/',
-            fileName: 'cache.js',
-            strict: false,
-            onUpdated: () => null
-        },
-        ...userConfig
-    };
+            ...{onUpdated: () => null},
+            ...userConfig
+        };
+
+    // extend file parameter
+    config.file = {
+        hash: false,
+        path: 'public/',
+        name: 'cache',
+        extension: 'js',
+        ...userConfig.file
+    }
+
     // extend api parameter
     config.api = {
         method: 'patch',
@@ -69,7 +74,7 @@ module.exports = function (userConfig) {
     /**
      *  ----- define constants ----
      */
-    // directly access to config parameter
+        // directly access to config parameter
     const
         {list, api} = config,
         storeName = '__ssrApiCache__';
@@ -81,8 +86,8 @@ module.exports = function (userConfig) {
     if (api.route.slice(-1) !== '/' || api.route.slice(0, 1) !== '/')
         console.error('ERROR ssr-api-cache: add slash character at start and end of "api.route" property in setup config.(exp: "/api/update/")');
 
-    if (config.filePath.slice(-1) !== '/')
-        console.error('ERROR ssr-api-cache: add slash character at end of "filePath" property in setup config.');
+    if (config.file.path.slice(-1) !== '/')
+        console.error('ERROR ssr-api-cache: add slash character at end of "file.path" property in setup config.');
 
     if (typeof list === 'undefined')
         console.error('ERROR ssr-api-cache: please set "list" property in setup config, because this is a require parameter.');
@@ -93,6 +98,18 @@ module.exports = function (userConfig) {
 
     //----------- utility functions -----------------//
     const
+        /**
+         * use for generate unique verion for cache.js file when file.hash is true
+         * @returns {string} : hash string like :"aAd12s"
+         */
+        versionHash = function () {
+            const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            let text = "";
+            for (var i = 0; i < 6; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+        },
+
         /**
          *
          * /@param madeContext : use when context of file
@@ -105,8 +122,13 @@ module.exports = function (userConfig) {
             // an string contain all static data values. exp: window.__a='a';window.__b='b';
             const fileContext = `window.${storeName}=${JSON.stringify(global[storeName])}`;
 
-            // file address. defaule is 'public/cache.js'
-            const fileAddress = config.filePath + config.fileName;
+            // define file name
+            const fileName =
+                global[storeName + 'fileName__'] =
+                    config.file.name + (config.file.hash ? versionHash() : '') + '.' + config.file.extension;
+
+            // file address. defaule is 'public/cache.js' or when hash is true  'public/cache1As74.js'
+            const fileAddress = config.file.path + fileName;
 
             // write on file (and create if does not exist)
             const writeFilePromise = new Promise(function (resolve, reject) {

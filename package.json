@@ -4,7 +4,7 @@
   "main": "getCache.js",
   "scripts": {
     "build": "babel ./src --watch --out-dir ./",
-    "demo": "babel ./src/getCache.js --out-file ./demo/public/getCache.js && nodemon ./demo/server.js --ignore cache.js"
+    "demo": "babel ./src/getCache.js --out-file ./demo/public/getCache.js && nodemon ./demo/server.js --ignore cache*.js"
   },
   "dependencies": {
     "axios": "^0.18.0",

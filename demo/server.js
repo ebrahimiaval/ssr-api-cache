@@ -31,7 +31,9 @@ app.use('/server', function (req, res) {
     const data = `
     menu = ${JSON.stringify(getCache("menu"))} <br/>
     theme = ${JSON.stringify(getCache("theme"))} <br/>
-    help = ${JSON.stringify(getCache("help"))}
+    help = ${JSON.stringify(getCache("help"))}<br/>
+    -----------------------------<br/>
+    fileName = ${global.__ssrApiCache__fileName__}
     `;
 
     res.status(200).send(data);
@@ -43,13 +45,18 @@ app.use('/server', function (req, res) {
 
 //>>>>>>>>>>> defne ssr-api-cache demo >>>>>>>>>>>>>>>>>
 cacheSetup({
-    api : {
+    api: {
         express: app,
         // method : 'patch',
         // route :  '/api/update/',
         // validIP: null,
     },
-    filePath: "demo/public/",
+    file: {
+        hash: false,
+        path: "demo/public/",
+        // name: 'cache',
+        // extension : 'js'
+    },
     onUpdated: function (item, newVlaue) {
         // console.log(item.name + " update to ", global['__' + item.name]);
     },
