@@ -23,6 +23,19 @@ app.get('/api/:name', function (req, res) {
 });
 
 
+/**
+ * see server side value
+ */
+app.use('/server', function (req, res) {
+    const data = `
+    menu = ${JSON.stringify(global.__menu)} <br/>
+    theme = ${JSON.stringify(global.__theme)} <br/>
+    help = ${JSON.stringify(global.__help)}     `;
+
+    res.status(200).send(data);
+});
+
+
 
 
 

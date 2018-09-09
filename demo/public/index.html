@@ -5,18 +5,22 @@
     <title>demo of ssr-api-cache module</title>
 </head>
 <body>
-<h1>SSR API Cache Demo</h1>
-<p>use "ctrl+F5" to see updated vlaue.</p>
+<h1>SSR API Cache - Demo</h1>
+<p>reload to see updated vlaue.</p>
 
-<h3>window.__menu</h3>
-<pre id="menu"></pre>
-<br>
-<h3>window.__theme</h3>
-<pre id="theme"></pre>
-<br>
-<h3>window.__help</h3>
-<pre id="help"></pre>
-<br>
+<br/>
+
+<h2>server side value</h2>
+<iframe src="/server" height="100" width="100%"></iframe><br/>
+<a href="/server" target="_blank">open new tab</a>
+
+<br/><br/><br/>
+
+<h2>client side value</h2>
+<b>menu=</b><code id="menu"></code><br/>
+<b>theme=</b><code id="theme"></code><br/>
+<b>help=</b><code id="help"></code><br/>
+
 <script src="/staticdata.js"></script>
 <script>
     document.getElementById('menu').innerHTML = JSON.stringify(window.__menu);
