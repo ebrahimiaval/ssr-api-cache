@@ -11,6 +11,7 @@
 <br/>
 
 <h2>server side value</h2>
+<p>defined in server.js at line 29.</p>
 <iframe src="/server" height="100" width="100%"></iframe>
 <br/>
 <a href="/server" target="_blank">open new tab</a>
@@ -22,12 +23,12 @@
 <b>theme=</b><span id="theme"></span><br/>
 <b>help=</b><span id="help"></span><br/>
 
-<script src="/staticdata.js"></script>
+<script src="cache.js"></script>
 <script src="getCache.js"></script>
 <script>
-    document.getElementById('menu').innerHTML = JSON.stringify(window.__menu);
-    document.getElementById('theme').innerHTML = JSON.stringify(window.__theme);
-    document.getElementById('help').innerHTML = JSON.stringify(window.__help);
+    ['menu','theme','help'].forEach(function (cacheName) {
+        document.getElementById(cacheName).innerHTML = JSON.stringify( getCache(cacheName) );
+    });
 </script>
 </body>
 </html>

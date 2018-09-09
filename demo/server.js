@@ -1,6 +1,7 @@
 const
     // import ssr-api-cache module
     cacheSetup = require('../setup'),
+    getCache = require('../getCache'),
     // create an express app
     express = require('express'),
     app = express();
@@ -28,9 +29,10 @@ app.get('/api/:name', function (req, res) {
  */
 app.use('/server', function (req, res) {
     const data = `
-    menu = ${JSON.stringify(global.__menu)} <br/>
-    theme = ${JSON.stringify(global.__theme)} <br/>
-    help = ${JSON.stringify(global.__help)}     `;
+    menu = ${JSON.stringify(getCache("menu"))} <br/>
+    theme = ${JSON.stringify(getCache("theme"))} <br/>
+    help = ${JSON.stringify(getCache("help"))}
+    `;
 
     res.status(200).send(data);
 });
@@ -41,28 +43,30 @@ app.use('/server', function (req, res) {
 
 //>>>>>>>>>>> defne ssr-api-cache demo >>>>>>>>>>>>>>>>>
 cacheSetup({
-    // apiRoute: '/api/update',
-    express: app,
-    // validIP: '192.168.6.23',
-    // strict: true,
-    filePath: "demo/public/staticdata.js",
+    api : {
+        express: app,
+        // method : 'patch',
+        // route :  '/api/update/',
+        // validIP: null,
+    },
+    filePath: "demo/public/",
     onUpdated: function (item, newVlaue) {
         // console.log(item.name + " update to ", global['__' + item.name]);
     },
     list: [
         {
-            api: 'http://localhost:3030/api/menu',
+            url: 'http://localhost:3030/api/menu',
             name: 'menu',
             default: "default menu",
             // update : 86400 // auto update as second (24h = 86400s)
             // expire: 86400 // auto update as second (24h = 86400s)
         },
         {
-            api: 'http://localhost:3030/api/theme',
+            url: 'http://localhost:3030/api/theme',
             name: 'theme',
         },
         {
-            api: 'http://localhost:3030/api/help',
+            url: 'http://localhost:3030/api/help',
             name: 'help',
             default: "default help"
         }

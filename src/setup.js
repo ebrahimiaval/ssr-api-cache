@@ -17,28 +17,11 @@ try {
 
 /**
  *  build cache stream
- * @param userOption
+ * @param userConfig
  */
-module.exports = function (userOption) {
+module.exports = function (userConfig) {
     /**
-     * ---- options ----
-     * @prefix
-     *  type : string
-     *  default:'__'
-     *  exp: '__myPrefix__'
-     * all static data define as global variables and interference value may occur.
-     * use postfix and prefix to fix this problem.
-     * NOTICE: by default we just add '__' prefix to variable but in complex project
-     * we recommend define complex prefix and postfix to ensure interference never occur.
-     *
-     *
-     * @postfix
-     *  type : string
-     *  default:''
-     *  exp: '__myPostfix__'
-     * like prefix. read prefix description.
-     *
-     *
+     * ---- config ----
      * @validIP
      *  type: string || array[string,...] || null
      *  default: null (all users is valid)
@@ -48,12 +31,6 @@ module.exports = function (userOption) {
      * by default is null and mean all user can update static files
      * but when you set an valid IP or IPs then just this IPs can do update static data.
      *
-     * @strict
-     *  type: boolean
-     *  default: false
-     * when strict is true then module use promissAll to ensure
-     * all data sucessfully fetched from API in first load time
-     * else an error will not be excute when an item is not fetch succesfully.
      *
      * @list
      *  isRequire
@@ -76,104 +53,73 @@ module.exports = function (userOption) {
      *
      */
     const
-        // extend user options with default options
-        options = {
-            ...{
-                validIP: null,
-                prefix: '__',
-                postfix: '',
-                strict: false,
-                onUpdated: () => null,
-                apiRoute: '/api/update', // default api route is '/api/update' and use look like this: localhost:8000/api/update/menu
-            },
-            ...userOption
+        storeName = '__ssrApiCache__';
+
+
+    // extend user config with default config
+    const config = {
+        ...{
+            filePath: 'public/',
+            fileName: 'cache.js',
+            strict: false,
+            onUpdated: () => null
         },
-        // directly access to options parameter
-        {express, validIP, list, apiRoute, strict, filePath} = options;
+        ...userConfig
+    };
+
+    // extend app
+    config.api = {
+        method: 'patch',
+        route: '/api/update/', // default api route is '/api/update' and use look like this: localhost:8000/api/update/menu
+        validIP: null,
+        ...userConfig.api
+    }
+
+    // directly access to config parameter
+    const {list, api} = config;
+
+
+    /**
+     * ----- config parameter validation ----
+     */
+    if (api.route.slice(-1) !== '/' || api.route.slice(0, 1) !== '/')
+        console.error('ERROR ssr-api-cache: add slash character at start and end of "api.route" property in setup config.(exp: "/api/update/")');
+
+    if (config.filePath.slice(-1) !== '/')
+        console.error('ERROR ssr-api-cache: add slash character at end of "filePath" property in setup config.');
+
+    if (typeof list === 'undefined')
+        console.error('ERROR ssr-api-cache: please set "list" property in setup config, because this is a require parameter.');
+
+
+
 
 
     //----------- utility functions -----------------//
     const
         /**
-         * variable name provider
-         *
-         * @param item<object> : an item of options 'list' parameter
-         * @returns {string} : built name of static data. exp: return '__title' for item name 'title'
-         */
-        sdName = (item) => options.prefix + item.name + options.postfix,
-
-        /**
-         * require option parameter validation Message
-         *
-         * @param paramName: name of option parameter.exp:'express'
-         * @returns {string} : error message string
-         */
-        validationErrorMessage = (paramName) => "ssr-api-cache ERROR: please set '" + paramName + "' parameter in define staticDataBuilder() place, because this is a require parameter.",
-
-        /**
-         * file Context Builder
-         * build context of js file. contain all static data as global variabels.
-         *
-         * /@param updatedItemName : name of updated item.
-         * when user run an update api for update one item name of this item passed as updatedItemName.
-         * if updayeItemName does not exist then value of client side global variabel is equal with
-         * server global varibale at now.
-         * /@param newValue : is require just when updatedItemName is exist and contain updated item data.
-         * @returns {string} : an string contain all static data values. exp: window.__a='a';window.__b='b';
-         */
-        fileContextBuilder = function (updatedItemName, newValue) {
-            let context = "";
-            list.forEach(function (item) {
-                // built name of item (name with prefix and postfix)
-                const name = sdName(item);
-
-                // define value of item.
-                // if this item is updated item we insert newValue to value
-                // else value is equal with his global variable
-                let value;
-                if (item.name !== updatedItemName) {
-                    value = global[name];
-                } else {
-                    // set new value for client variable
-                    value = newValue;
-
-                    // update server variable
-                    global[name] = newValue;
-                }
-
-                // join string of static data global varabels.
-                // Convert value to string for write to file
-                context += `window.${name}=${JSON.stringify(value)};`;
-            });
-
-            // retrun an string contain all static data values.
-            return context;
-        },
-
-        /**
          *
          * /@param madeContext : use when context of file
          * avaiable and dont need run fileContextBuilder(). used in first load define value.
-         * /@param updatedItemName : name of updated item.
-         * /@param newValue : is require just when updatedItemName is exist and contain updated item data.
+         * /@param cacheItemName : name of updated item.
+         * /@param newValue : is require just when cacheItemName is exist and contain updated item data.
          * @returns {Promise<any>}
          */
-        buildJsFile = function ({madeContext, updatedItem, newValue}) {
+        buildJsFile = function () {
             // an string contain all static data values. exp: window.__a='a';window.__b='b';
-            const fileContext = madeContext || fileContextBuilder(updatedItem.name, newValue);
+            const fileContext = `window.${storeName}=${JSON.stringify(global[storeName])}`;
+
+            // file address. defaule is 'public/cache.js'
+            const fileAddress = config.filePath + config.fileName;
 
             // write on file (and create if does not exist)
             const writeFilePromise = new Promise(function (resolve, reject) {
-                fs.writeFile(filePath, fileContext, function (error) {
+                fs.writeFile(fileAddress, fileContext, function (error) {
                     if (error) {
-                        //ERROR
                         console.error(error);
-
-                        // when occur an error during write on file
-                        reject('can not build clientside js file.');
+                        reject('occur an error during write on clientside js file.');
                     } else {
-                        // succesfully write fileContext inside of clientside js file.
-                        resolve();
+                        resolve('succesfully write fileContext inside of clientside js file.');
                     }
                 });
             });
@@ -187,23 +133,28 @@ module.exports = function (userOption) {
          * we send an item of list with new value to updateItem
          * then this method call fileContextBuilder and buildJsFile at end update server global variables
          *
-         * @param updatedItem : an item of list (options.list)
+         * @param cacheItem : an item of list (config.list)
          * @param newValue : new value of item (feched from api)
          */
-        updateItem = function (updatedItem, newValue) {
+        updateItem = function (cacheItem, newValue) {
+            // for coming back when can not write on file.
+            const lastVlaue = global[storeName][cacheItem.name];
 
-            const writeFilePromise = buildJsFile({updatedItem: updatedItem, newValue: newValue});
+            // update cacheItem
+            if (typeof cacheItem !== 'undefined')
+                global[storeName][cacheItem.name] = newValue;
 
-            // update server global variable
+            // write cache item to js file
+            const writeFilePromise = buildJsFile();
+
             writeFilePromise
                 .then(function () {
-                    // // built name of item (name with prefix and postfix)
-                    // const name = sdName(updatedItem);
-                    //
-                    // global[name] = newValue;
-
                     // trigger onUpdated event
-                    options.onUpdated(updatedItem, newValue);
+                    config.onUpdated(cacheItem, newValue);
+                })
+                .catch(function () {
+                    // coming back to last value when can not write on file.
+                    global[storeName][cacheItem.name] = lastVlaue;
                 });
 
             return writeFilePromise;
@@ -215,13 +166,13 @@ module.exports = function (userOption) {
          */
         fetchDataFromApi = function (item) {
             const fetchPromise = new Promise(function (resolve, reject) {
-                axios({url: item.api})
+                axios({url: item.url})
                     .then(function (response) {
                         updateItem(item, response.data)
-                            .then(function () {
+                            .then(function (value) {
                                 // when occur below. see buildJsFile() method.
                                 // >> succesfully write fileContext inside of clientside js file.
-                                resolve();
+                                resolve(value);
                             })
                             .catch(function (error) {
                                 //when happen error. see buildJsFile() method.
@@ -229,6 +180,7 @@ module.exports = function (userOption) {
                             })
                     })
                     .catch(function (error) {
+                        //axios error handling
                         if (error.response) {
                             // The request was made and the server responded with a status code
                             // that falls out of the range of 2xx
@@ -246,7 +198,7 @@ module.exports = function (userOption) {
                         }
 
                         // when server can not fetch data from api
-                        reject("can not fetch data from " + item.api + " API.");
+                        reject("can not fetch data from " + item.url + " API.");
                     });
             });
 
@@ -254,46 +206,30 @@ module.exports = function (userOption) {
         };
 
 
-    //----------- define and build -----------------//
-
-    /**
-     * check require options parameter definded
-     */
-    if (typeof express === 'undefined')
-        throw validationErrorMessage('express'); // express app object
-    if (typeof list === 'undefined')
-        throw validationErrorMessage('list'); // list of static data info
-
-
-
     /**
      * set default value (first load)
      *
      * define global variable in server and make static data js file with
-     * default value set to list item (list is parameter of options)
+     * default value set to list item (list is parameter of config)
      */
-    let firstFileContext = "";
+    // define server cache store with storeName name
+    global[storeName] = {};
+    //build server cache store
     list.forEach(function (item) {
-        // built name of item (name with prefix and postfix)
-        const name = sdName(item);
-
         // SSR var - global variabels used in server side render static data
         // exp: global.__title="hot page"
-        global[name] = item.default || null;
-
-        // join string of static data global varabels.
-        firstFileContext += `window.${name}=${JSON.stringify(item.default)};`;
+        global[storeName][item.name] = item.default || null;
     });
     // create js file (if does not exist) and write firstFileContext in it.
-    buildJsFile({madeContext: firstFileContext})
+    buildJsFile()
         .then(function () {
-            console.info('ssr-api-cache SUCCESSFULL: static data defined with default value successfully.');
+            console.info('SUCCESSFULL ssr-api-cache: cache items defined with default value successfully.');
 
             // first fetch data from api
             list.forEach(function (item) {
                 fetchDataFromApi(item)
                     .catch(function (error) {
-                        console.error('ssr-api-cache ERROR: ', error, '(error in first load)');
+                        console.error('ERROR ssr-api-cache: ', error, '(error in first load)');
                     });
             });
         });
@@ -309,79 +245,65 @@ module.exports = function (userOption) {
      * update staticdata.js
      * update mega menu data and footer link
      */
-    express.patch(apiRoute + '/:name', function (req, res) {
-        const
-            name = req.params.name,
-            ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        let status, response;
-
-        // -------  validation -------
-        let isInvalid = false;
-        if (Array.isArray(validIP)) {
-            const detectList = validIP.filter(function (item) {
-                return item === ip;
-            });
-            //
-            isInvalid = detectList.length === 0;
-        }
-        else if (typeof validIP === "string") {
-            isInvalid = ip !== validIP;
-        }
+    if (typeof api.express !== 'undefined') {
+        const apiRoute = api.route + ':name';
         //
-        if (isInvalid) {
-            status = 402;
-            response = "You have not access to run update cache api!";
-        }
+        api.express.use(apiRoute, function (req, res, next) {
+            if (req.method === api.method.toLowerCase()) {
+                const
+                    validIP = config.app.validIP,
+                    name = req.params.name,
+                    ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-        // fetch data and update
-        let targetItem = null
-        list.forEach(function (item) {
-            if (item.name === name)
-                targetItem = item;
-        });
+                let status, response;
 
-        if (targetItem !== null) {
-            fetchDataFromApi(targetItem)
-                .then(function () {
-                    status = 200;
-                    response = name + " successfully updated.";
-                })
-                .catch(function (error) {
-                    console.error('ssr-api-cache ERROR: ', error, `(error in update API - requested IP ${ip})`);
+                // -------  validation -------
+                let isInvalid = false;
+                if (Array.isArray(validIP)) {
+                    const detectList = validIP.filter(function (item) {
+                        return item === ip;
+                    });
                     //
-                    status = 500;
-                    response = `have error during fetch data from api '${targetItem.api}' of '${targetItem.name}'.`;
+                    isInvalid = detectList.length === 0;
+                }
+                else if (typeof validIP === "string") {
+                    isInvalid = ip !== validIP;
+                }
+                // reject request for invalid user - when request ip not match to validIP user is invalid
+                // NOTICE: by default all ip is valid (validIP === null)
+                if (isInvalid) {
+                    status = 402;
+                    response = "You have not access to run update cache api!";
+                }
+
+                // fetch data and update
+                let targetItem = null
+                list.forEach(function (item) {
+                    if (item.name === name)
+                        targetItem = item;
                 });
-        } else {
-            status = 404;
-            response = `not found any item with name = ${name}. check inserted value.`;
-        }
 
-        res.status(status).send(response);
-    });
+                if (targetItem !== null) {
+                    fetchDataFromApi(targetItem)
+                        .then(function () {
+                            status = 200;
+                            response = name + " successfully updated.";
+                        })
+                        .catch(function (error) {
+                            console.error('ERROR ssr-api-cache: ', error, `(error in update API - requested IP ${ip})`);
+                            //
+                            status = 500;
+                            response = `have error during fetch data from api '${targetItem.api}' of '${targetItem.name}'.`;
+                        });
+                } else {
+                    status = 404;
+                    response = `not found any item with name = ${name}. check inserted value.`;
+                }
+
+                res.status(status).send(response);
+            } else {
+                next();
+            }
+        });
+    }
 }
-
-
-
-
-
-// /**
-//  * read value of one cache
-//  * @type {{setup: setup, get}}
-//  */
-// const get = function (name) {
-//     return (typeof window === 'undefined') ? global.__ssrApiCache__[name] : window.__ssrApiCache__[name];
-// }
-//
-//
-
-
-// /**
-//  * export
-//  * @type {{setup: setup, get: {setup: setup, get}}}
-//  */
-// module.exports = {
-//     setup: setup,
-//     get: get
-// }
