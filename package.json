@@ -1,6 +1,6 @@
 {
   "name": "ssr-api-cache",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "babel ./src --watch --out-dir ./dist --source-maps",
