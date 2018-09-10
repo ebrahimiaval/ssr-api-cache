@@ -52,7 +52,7 @@ cacheSetup({
         // validation: null,
     },
     file: {
-        hash: false,
+        hash: true,
         path: "demo/public/",
         // name: 'cache',
         // extension : 'js'

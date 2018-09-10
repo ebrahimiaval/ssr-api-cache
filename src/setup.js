@@ -50,11 +50,11 @@ module.exports = function (userConfig) {
      */
 
 
-    // extend user config with default config
+        // extend user config with default config
     const config = {
-        ...{onUpdated: () => null},
-        ...userConfig
-    };
+            ...{onUpdated: () => null},
+            ...userConfig
+        };
 
     // extend file parameter
     config.file = {
@@ -125,10 +125,11 @@ module.exports = function (userConfig) {
             const fileContext = `window.${storeName}=${JSON.stringify(global[storeName])}`;
 
             // define file name
-            const fileName = config.file.name + (config.file.hash ? versionHash() : '') + '.' + config.file.extension;
+            const version = config.file.hash ? '?v=' + versionHash() : ''
+            const fileName = config.file.name + '.' + config.file.extension;
 
             // for access to file name
-            process.env['SSRAPICACHE_FILENAME'] = fileName;
+            process.env['SSRAPICACHE_FILENAME'] = fileName + version;
 
             // file address. defaule is 'public/cache.js' or when hash is true  'public/cache1As74.js'
             const fileAddress = config.file.path + fileName;
@@ -288,7 +289,7 @@ module.exports = function (userConfig) {
                     ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
                 // -------  validation -------
-                let isInvalid = true;
+                let isInvalid = false;
                 if (typeof validation === "string") {
                     isInvalid = (validation !== ip);
                 }

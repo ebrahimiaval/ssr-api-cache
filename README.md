@@ -41,9 +41,15 @@ const config = {
     // config client side js file
     // default: (not required) module use default config.
     file: {
-        // use for generate unique verion for cache.js file.exp :"cache1Ad12s.js"
+        // use for generate unique verion for cache.js file.exp :"cache.js?v=1Ad12s"
         // use process.env.SSRAPICACHE_FILENAME to get file name.
-        // default: (not required) false
+        // each time file change module generatre new hash
+        // default: (not required) false 
+        // value:
+        //      bolean: 
+        //          false :do not generate any hash version
+        //          true : generate 6 character
+        //      number : number of character (like true but with custom hash character number)
         hash: false,
         // file path. start from root of nodejs server.
         // (NOTICE: ended with slash and not exist slash at start)
