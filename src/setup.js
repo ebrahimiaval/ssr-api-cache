@@ -105,10 +105,14 @@ module.exports = function (userConfig) {
          * @returns {string} : hash string like :"aAd12s"
          */
         versionHash = function () {
-            const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            const
+                count = (config.file.hash === true) ? 6 : config.file.hash,
+                possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            //
             let text = "";
-            for (var i = 0; i < 6; i++)
+            for (var i = 0; i < count; i++)
                 text += possible.charAt(Math.floor(Math.random() * possible.length));
+            //
             return text;
         },
 
