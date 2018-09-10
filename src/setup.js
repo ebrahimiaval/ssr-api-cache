@@ -18,7 +18,7 @@ const fs = require('fs');
 module.exports = function (userConfig) {
     /**
      * ---- config ----
-     * @validIP
+     * @validation
      *  type: string || array[string,...] || null
      *  default: null (all users is valid)
      *  string exp: '192.168.1.1'
@@ -48,11 +48,13 @@ module.exports = function (userConfig) {
      *      }
      *
      */
-        // extend user config with default config
+
+
+    // extend user config with default config
     const config = {
-            ...{onUpdated: () => null},
-            ...userConfig
-        };
+        ...{onUpdated: () => null},
+        ...userConfig
+    };
 
     // extend file parameter
     config.file = {
@@ -67,7 +69,7 @@ module.exports = function (userConfig) {
     config.api = {
         method: 'patch',
         route: '/api/update/', // default api route is '/api/update' and use look like this: localhost:8000/api/update/menu
-        validIP: null,
+        validation: null, // String: valid ip - Array: [ip1, ip2, ...] - Function: if return true valid else is invalid
         ...userConfig.api
     }
 
@@ -225,7 +227,7 @@ module.exports = function (userConfig) {
 
 
     /**
-     * set default value (first load)
+     * first load - set default value
      *
      * define global variable in server and make static data js file with
      * default value set to list item (list is parameter of config)
@@ -237,7 +239,17 @@ module.exports = function (userConfig) {
         // SSR var - global variabels used in server side render static data
         // exp: global.__title="hot page"
         global[storeName][item.name] = item.default || null;
+
+        // set auto update
+        if (typeof item.update !== 'undefined')
+            setInterval(function () {
+                fetchDataFromApi(item)
+                    .catch(function (error) {
+                        console.error('ERROR ssr-api-cache: ', error, '(error in item auto update)');
+                    });
+            }, item.update);
     });
+
     // create js file (if does not exist) and write firstFileContext in it.
     buildJsFile()
         .then(function () {
@@ -267,28 +279,34 @@ module.exports = function (userConfig) {
         const apiRoute = api.route + ':name';
         //
         api.express.use(apiRoute, function (req, res, next) {
+
             if (req.method.toLowerCase() === api.method.toLowerCase()) {
                 const
-                    validIP = api.validIP,
+                    validation = api.validation,
                     name = req.params.name,
                     ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-                let status, response;
-
                 // -------  validation -------
-                let isInvalid = false;
-                if (Array.isArray(validIP)) {
-                    const detectList = validIP.filter(function (item) {
+                let isInvalid = true;
+                if (typeof validation === "string") {
+                    isInvalid = (validation !== ip);
+                }
+                else if (typeof validation === "function") {
+                    isInvalid = validation(req);
+                }
+                else if (Array.isArray(validation)) {
+                    // list of IPs. exp : ['192.168.1.1','192.168.1.2', '192.168.1.3']
+                    const detectList = validation.filter(function (item) {
                         return item === ip;
                     });
                     //
-                    isInvalid = detectList.length === 0;
+                    isInvalid = (detectList.length === 0);
+                } else if (validation !== null) {
+                    console.error('ERROR ssr-api-cache: value of api.validation is invalid and we banned all update request. read ssr-api-cache document.')
+                    isInvalid = true;
                 }
-                else if (typeof validIP === "string") {
-                    isInvalid = ip !== validIP;
-                }
-                // reject request for invalid user - when request ip not match to validIP user is invalid
-                // NOTICE: by default all ip is valid (validIP === null)
+                // reject request for invalid user - when request ip not match to validation user is invalid
+                // NOTICE: by default all ip is valid (validation === null)
                 if (isInvalid) {
                     res.status(402).send("You have not access to run update cache api!");
                     return false;

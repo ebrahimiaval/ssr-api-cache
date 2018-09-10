@@ -49,7 +49,7 @@ cacheSetup({
         express: app,
         // method : 'patch',
         // route :  '/api/update/',
-        // validIP: null,
+        // validation: null,
     },
     file: {
         hash: false,
@@ -57,7 +57,8 @@ cacheSetup({
         // name: 'cache',
         // extension : 'js'
     },
-    onUpdated: function (item, newVlaue) {
+    onUpdated: function (cacheItem, newVlaue) {
+        console.log(cacheItem.name + " updated to " + JSON.stringify(newVlaue));
         // console.log(item.name + " update to ", global['__' + item.name]);
     },
     list: [
@@ -65,8 +66,7 @@ cacheSetup({
             url: 'http://localhost:3030/api/menu',
             name: 'menu',
             default: "default menu",
-            // update : 86400 // auto update as second (24h = 86400s)
-            // expire: 86400 // auto update as second (24h = 86400s)
+            // update: 5000 // auto update as second (24h = 86400s)
         },
         {
             url: 'http://localhost:3030/api/theme',
