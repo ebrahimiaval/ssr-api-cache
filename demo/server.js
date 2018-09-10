@@ -33,7 +33,7 @@ app.use('/server', function (req, res) {
     theme = ${JSON.stringify(getCache("theme"))} <br/>
     help = ${JSON.stringify(getCache("help"))}<br/>
     -----------------------------<br/>
-    fileName = ${global.__ssrApiCache__fileName__}
+    fileName = ${process.env.SSRAPICACHE_FILENAME} <br/>
     `;
 
     res.status(200).send(data);

@@ -42,7 +42,7 @@ const config = {
     // default: (not required) module use default config.
     file: {
         // use for generate unique verion for cache.js file.exp :"cache1Ad12s.js"
-        // when set hash true you most define name of js file with 'global.__ssrApiCache__fileName__' in server side.
+        // use process.env.SSRAPICACHE_FILENAME to get file name.
         // default: (not required) false
         hash: false,
         // file path. start from root of nodejs server.

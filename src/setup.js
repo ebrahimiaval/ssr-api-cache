@@ -125,9 +125,10 @@ module.exports = function (userConfig) {
             const fileContext = `window.${storeName}=${JSON.stringify(global[storeName])}`;
 
             // define file name
-            const fileName =
-                global[storeName + 'fileName__'] =
-                    config.file.name + (config.file.hash ? versionHash() : '') + '.' + config.file.extension;
+            const fileName = config.file.name + (config.file.hash ? versionHash() : '') + '.' + config.file.extension;
+
+            // for access to fileName.js
+            process.env['SSRAPICACHE_FILENAME'] = fileName;
 
             // file address. defaule is 'public/cache.js' or when hash is true  'public/cache1As74.js'
             const fileAddress = config.file.path + fileName;

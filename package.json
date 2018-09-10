@@ -1,6 +1,5 @@
 {
   "name": "ssr-api-cache",
-  "version": "1.3.0",
   "main": "getCache.js",
   "scripts": {
     "build": "babel ./src --watch --out-dir ./",
