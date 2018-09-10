@@ -127,7 +127,7 @@ module.exports = function (userConfig) {
             // define file name
             const fileName = config.file.name + (config.file.hash ? versionHash() : '') + '.' + config.file.extension;
 
-            // for access to fileName.js
+            // for access to file name
             process.env['SSRAPICACHE_FILENAME'] = fileName;
 
             // file address. defaule is 'public/cache.js' or when hash is true  'public/cache1As74.js'
