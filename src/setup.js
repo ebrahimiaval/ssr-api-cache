@@ -298,7 +298,7 @@ module.exports = function (userConfig) {
                     isInvalid = (validation !== ip);
                 }
                 else if (typeof validation === "function") {
-                    isInvalid = validation(req);
+                    isInvalid = !validation(req);
                 }
                 else if (Array.isArray(validation)) {
                     // list of IPs. exp : ['192.168.1.1','192.168.1.2', '192.168.1.3']
