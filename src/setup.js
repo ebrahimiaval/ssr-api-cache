@@ -334,7 +334,7 @@ module.exports = function (userConfig) {
                         .catch(function (error) {
                             console.error('ERROR ssr-api-cache: ', error, `(error in update API - requested IP ${ip})`);
                             //
-                            res.status(500).send(`have error during fetch data from api '${targetItem.api}' of '${targetItem.name}'.`);
+                            res.status(500).send(`have error during fetch data from api '${targetItem.url}' of '${targetItem.name}'.`);
                         });
                 } else {
                     res.status(404).send(`not found any item with name = ${name}. check inserted value.`);
